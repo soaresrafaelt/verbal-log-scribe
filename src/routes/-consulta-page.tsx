@@ -150,17 +150,29 @@ export function ConsultaPage() {
   const isRecording = status === "recording";
   const isSending = status === "sending";
 
-  const hoje = new Date();
-  const dia = hoje.getDate().toString().padStart(2, "0");
-  const mes = hoje
-    .toLocaleString("pt-BR", { month: "short" })
-    .replace(".", "")
-    .toUpperCase();
-  const ano = hoje.getFullYear();
-  const horaAgora = hoje.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const [agora, setAgora] = useState<{
+    dia: string;
+    mes: string;
+    ano: string;
+    horaAgora: string;
+  }>({ dia: "", mes: "", ano: "", horaAgora: "" });
+
+  useEffect(() => {
+    const hoje = new Date();
+    setAgora({
+      dia: hoje.getDate().toString().padStart(2, "0"),
+      mes: hoje
+        .toLocaleString("pt-BR", { month: "short" })
+        .replace(".", "")
+        .toUpperCase(),
+      ano: String(hoje.getFullYear()),
+      horaAgora: hoje.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    });
+  }, []);
+  const { dia, mes, ano, horaAgora } = agora;
 
   const timelineMensagem = (() => {
     switch (status) {
