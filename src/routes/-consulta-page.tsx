@@ -346,9 +346,9 @@ export function ConsultaPage() {
                   Ocultar
                 </button>
               </div>
-              <div className="flex items-center gap-3 rounded-md border border-border bg-muted/40 px-4 py-3">
-                <Clock className="h-5 w-5 text-muted-foreground" />
-                <span className="font-mono text-2xl tabular-nums text-foreground">
+              <div className="flex items-center gap-3 rounded-xl border border-border bg-slate-50 px-4 py-3">
+                <Clock className="h-5 w-5 text-primary" />
+                <span className="font-mono text-2xl tabular-nums text-slate-800">
                   {formatTime(elapsed)}
                 </span>
               </div>
@@ -359,10 +359,10 @@ export function ConsultaPage() {
               onClick={isRecording ? handleFinalizar : handleIniciar}
               disabled={isSending}
               className={
-                "flex w-full items-center justify-center gap-2 rounded-md px-4 py-3 text-sm font-semibold transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 " +
+                "flex w-full items-center justify-center gap-2 rounded-lg px-4 py-3 text-sm font-semibold transition-colors disabled:cursor-not-allowed disabled:opacity-60 " +
                 (isRecording
-                  ? "bg-destructive text-destructive-foreground"
-                  : "bg-primary text-primary-foreground")
+                  ? "bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  : "bg-primary text-primary-foreground hover:bg-primary/90")
               }
             >
               {isSending ? (
