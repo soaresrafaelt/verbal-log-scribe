@@ -211,7 +211,7 @@ export function ConsultaPage() {
   })();
 
   return (
-    <div className="min-h-screen bg-muted/40">
+    <div className="min-h-screen bg-slate-50">
       {/* ============ MOBILE LAYOUT ============ */}
       <div className="flex min-h-screen flex-col md:hidden">
         <header className="flex h-12 items-center justify-center bg-primary px-5 text-primary-foreground">
@@ -220,15 +220,18 @@ export function ConsultaPage() {
           </span>
         </header>
 
-        <section className="flex flex-col items-center gap-2 border-b border-border bg-card px-5 py-6 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
+        <section className="flex flex-col items-center gap-3 border-b border-border bg-card px-5 py-8 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary text-lg font-semibold text-primary-foreground">
             {PACIENTE.iniciais}
           </div>
-          <h1 className="text-3xl font-bold leading-tight text-primary">
+          <h1 className="text-3xl font-bold leading-tight text-slate-800">
             {PACIENTE.nome}
           </h1>
-          <p className="text-sm text-muted-foreground">
-            Nascimento: {PACIENTE.nascimento}
+          <p className="text-sm leading-relaxed text-slate-500">
+            <span className="text-slate-500">Nascimento:</span>{" "}
+            <span className="font-medium text-slate-800">
+              {PACIENTE.nascimento}
+            </span>
           </p>
         </section>
 
