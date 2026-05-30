@@ -324,7 +324,7 @@ export function ConsultaPage() {
         </div>
       </header>
 
-      <div className="flex">
+      <div className="hidden md:flex">
         {/* Sidebar */}
         <aside className="min-h-[calc(100vh-3.5rem)] w-72 border-r border-border bg-card">
           <div className="border-b border-border px-6 py-5">
