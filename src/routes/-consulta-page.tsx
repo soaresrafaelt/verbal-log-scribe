@@ -150,17 +150,29 @@ export function ConsultaPage() {
   const isRecording = status === "recording";
   const isSending = status === "sending";
 
-  const hoje = new Date();
-  const dia = hoje.getDate().toString().padStart(2, "0");
-  const mes = hoje
-    .toLocaleString("pt-BR", { month: "short" })
-    .replace(".", "")
-    .toUpperCase();
-  const ano = hoje.getFullYear();
-  const horaAgora = hoje.toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
+  const [agora, setAgora] = useState<{
+    dia: string;
+    mes: string;
+    ano: string;
+    horaAgora: string;
+  }>({ dia: "", mes: "", ano: "", horaAgora: "" });
+
+  useEffect(() => {
+    const hoje = new Date();
+    setAgora({
+      dia: hoje.getDate().toString().padStart(2, "0"),
+      mes: hoje
+        .toLocaleString("pt-BR", { month: "short" })
+        .replace(".", "")
+        .toUpperCase(),
+      ano: String(hoje.getFullYear()),
+      horaAgora: hoje.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+    });
+  }, []);
+  const { dia, mes, ano, horaAgora } = agora;
 
   const timelineMensagem = (() => {
     switch (status) {
@@ -200,8 +212,96 @@ export function ConsultaPage() {
 
   return (
     <div className="min-h-screen bg-muted/40">
-      {/* Topbar */}
-      <header className="flex h-14 items-center justify-between bg-primary px-6 text-primary-foreground">
+      {/* ============ MOBILE LAYOUT ============ */}
+      <div className="flex min-h-screen flex-col md:hidden">
+        <header className="flex h-12 items-center justify-center bg-primary px-5 text-primary-foreground">
+          <span className="text-base font-semibold tracking-tight">
+            ◆ Prontuário
+          </span>
+        </header>
+
+        <section className="flex flex-col items-center gap-2 border-b border-border bg-card px-5 py-6 text-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary/10 text-lg font-semibold text-primary">
+            {PACIENTE.iniciais}
+          </div>
+          <h1 className="text-3xl font-bold leading-tight text-primary">
+            {PACIENTE.nome}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Nascimento: {PACIENTE.nascimento}
+          </p>
+        </section>
+
+        <section className="px-5 pt-8 text-center">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+            Duração da consulta
+          </p>
+          <p className="mt-1 font-mono text-5xl font-semibold tabular-nums text-foreground">
+            {formatTime(elapsed)}
+          </p>
+          {isRecording && (
+            <div className="mt-2 flex items-center justify-center gap-2 text-xs font-medium text-destructive">
+              <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-destructive" />
+              Gravando áudio…
+            </div>
+          )}
+        </section>
+
+        <section className="flex flex-col items-center px-5 pt-8">
+          <button
+            type="button"
+            onClick={isRecording ? handleFinalizar : handleIniciar}
+            disabled={isSending}
+            className={
+              "flex h-48 w-48 flex-col items-center justify-center gap-2 rounded-full text-base font-semibold shadow-lg transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 " +
+              (isRecording
+                ? "bg-destructive text-destructive-foreground ring-8 ring-destructive/20"
+                : "bg-primary text-primary-foreground ring-8 ring-primary/15")
+            }
+          >
+            {isSending ? (
+              <span className="text-lg">Enviando...</span>
+            ) : isRecording ? (
+              <>
+                <Square className="h-14 w-14 fill-current" />
+                <span>Finalizar consulta</span>
+              </>
+            ) : (
+              <>
+                <Play className="h-14 w-14 fill-current" />
+                <span>Iniciar consulta</span>
+              </>
+            )}
+          </button>
+
+          <div className="mt-6 min-h-[2.5rem] text-center text-sm">
+            {status === "success" && (
+              <p className="font-medium text-foreground">
+                Consulta enviada com sucesso
+              </p>
+            )}
+            {status === "error" && (
+              <p className="font-medium text-destructive">
+                Não foi possível enviar a gravação, tente novamente
+              </p>
+            )}
+            {status === "permission-denied" && (
+              <p className="font-medium text-destructive">
+                Permissão de microfone negada. Habilite o microfone para gravar
+                a consulta.
+              </p>
+            )}
+            {status === "idle" && (
+              <p className="text-muted-foreground">
+                Toque para iniciar a gravação
+              </p>
+            )}
+          </div>
+        </section>
+      </div>
+
+      {/* ============ DESKTOP LAYOUT ============ */}
+      <header className="hidden h-14 items-center justify-between bg-primary px-6 text-primary-foreground md:flex">
         <div className="flex items-center gap-8">
           <span className="text-lg font-semibold tracking-tight">
             ◆ Prontuário
@@ -224,7 +324,7 @@ export function ConsultaPage() {
         </div>
       </header>
 
-      <div className="flex">
+      <div className="hidden md:flex">
         {/* Sidebar */}
         <aside className="min-h-[calc(100vh-3.5rem)] w-72 border-r border-border bg-card">
           <div className="border-b border-border px-6 py-5">
