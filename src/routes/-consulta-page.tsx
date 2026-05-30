@@ -310,14 +310,14 @@ export function ConsultaPage() {
             ◆ Prontuário
           </span>
           <nav className="hidden items-center gap-6 text-sm md:flex">
-            <span className="opacity-90 hover:opacity-100">Painel</span>
-            <span className="opacity-90 hover:opacity-100">Agenda</span>
-            <span className="opacity-90 hover:opacity-100">Pacientes</span>
-            <span className="flex items-center gap-1 opacity-90 hover:opacity-100">
+            <span className="cursor-pointer opacity-90 transition-opacity hover:opacity-100">Painel</span>
+            <span className="cursor-pointer opacity-90 transition-opacity hover:opacity-100">Agenda</span>
+            <span className="cursor-pointer opacity-90 transition-opacity hover:opacity-100">Pacientes</span>
+            <span className="flex cursor-pointer items-center gap-1 opacity-90 transition-opacity hover:opacity-100">
               Gestão <ChevronDown className="h-3 w-3" />
             </span>
-            <span className="opacity-90 hover:opacity-100">Marketing</span>
-            <span className="flex items-center gap-1 opacity-90 hover:opacity-100">
+            <span className="cursor-pointer opacity-90 transition-opacity hover:opacity-100">Marketing</span>
+            <span className="flex cursor-pointer items-center gap-1 opacity-90 transition-opacity hover:opacity-100">
               Outros <ChevronDown className="h-3 w-3" />
             </span>
           </nav>
