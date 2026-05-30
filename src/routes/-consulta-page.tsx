@@ -256,10 +256,10 @@ export function ConsultaPage() {
             onClick={isRecording ? handleFinalizar : handleIniciar}
             disabled={isSending}
             className={
-              "flex h-48 w-48 flex-col items-center justify-center gap-2 rounded-full text-base font-semibold shadow-lg transition-all active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 " +
+              "flex h-48 w-48 flex-col items-center justify-center gap-2 rounded-full text-base font-semibold shadow-lg transition-colors active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 " +
               (isRecording
                 ? "bg-destructive text-destructive-foreground ring-8 ring-destructive/20"
-                : "bg-primary text-primary-foreground ring-8 ring-primary/15")
+                : "bg-primary text-primary-foreground ring-8 ring-primary/15 hover:bg-primary/90")
             }
           >
             {isSending ? (
