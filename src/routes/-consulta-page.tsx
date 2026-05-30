@@ -471,47 +471,47 @@ export function ConsultaPage() {
 
           {/* Timeline */}
           <div className="flex gap-4">
-            <div className="flex w-16 shrink-0 flex-col items-center overflow-hidden rounded-md border border-primary/30 bg-primary/10 text-primary">
-              <span className="w-full bg-primary/20 py-1 text-center text-2xl font-bold leading-none">
+            <div className="flex w-16 shrink-0 flex-col items-center overflow-hidden rounded-xl border border-border bg-card text-slate-600 shadow-sm">
+              <span className="w-full bg-primary/10 py-1 text-center text-2xl font-bold leading-none text-primary">
                 {dia}
               </span>
-              <span className="py-1 text-[10px] font-semibold tracking-widest">
+              <span className="py-1 text-[10px] font-semibold tracking-widest text-slate-500">
                 {mes}
               </span>
-              <span className="pb-2 text-xs">{ano}</span>
+              <span className="pb-2 text-xs text-slate-500">{ano}</span>
             </div>
 
-            <div className="flex-1 rounded-lg border border-border bg-card shadow-sm">
+            <div className="flex-1 rounded-xl border border-border bg-card shadow-sm">
               <div className="flex items-center justify-between border-b border-border px-5 py-3">
-                <div className="flex items-center gap-2 text-sm text-foreground">
+                <div className="flex items-center gap-2 text-sm text-slate-800">
                   <span>Por: Dr. José Rodrigues</span>
-                  <Lock className="h-3 w-3 text-muted-foreground" />
+                  <Lock className="h-3 w-3 text-slate-400" />
                 </div>
-                <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                <div className="flex items-center gap-1 text-xs text-slate-500">
                   <Clock className="h-3 w-3" />
                   {horaAgora}
                 </div>
               </div>
 
               <div className="space-y-3 px-5 py-4">
-                <p className="text-sm font-medium text-primary">
+                <p className="text-base font-semibold text-slate-800">
                   Consulta por áudio
                 </p>
                 <p className={"text-sm " + timelineMensagem.tone}>
                   {timelineMensagem.text}
                 </p>
                 {status === "recording" && (
-                  <p className="font-mono text-xs text-muted-foreground">
+                  <p className="font-mono text-xs text-slate-500">
                     Tempo decorrido: {formatTime(elapsed)}
                   </p>
                 )}
               </div>
 
               <div className="flex justify-end gap-2 border-t border-border px-5 py-3">
-                <button className="flex items-center gap-2 rounded-md border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:text-foreground">
+                <button className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
                   <Plus className="h-3 w-3" /> Inserir informações
                 </button>
-                <button className="flex items-center gap-2 rounded-md border border-border px-2 py-1.5 text-muted-foreground hover:text-foreground">
+                <button className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
                   <Printer className="h-3 w-3" />
                 </button>
               </div>
