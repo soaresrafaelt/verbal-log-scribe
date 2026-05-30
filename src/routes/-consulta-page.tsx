@@ -402,40 +402,50 @@ export function ConsultaPage() {
         </aside>
 
         {/* Main */}
-        <section className="flex-1 space-y-6 p-8">
-          <h1 className="text-2xl font-semibold text-foreground">Resumo</h1>
+        <section className="flex-1 space-y-8 p-8">
+          <h1 className="text-2xl font-semibold text-slate-800">Resumo</h1>
 
           {/* Patient card */}
-          <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
+          <div className="rounded-xl border border-border bg-card p-6 shadow-sm">
             <div className="flex flex-wrap items-start gap-6">
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xl font-semibold text-primary">
+              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-primary text-xl font-semibold text-primary-foreground">
                 {PACIENTE.iniciais}
               </div>
 
-              <div className="flex-1 space-y-1">
-                <h2 className="text-2xl font-semibold text-primary">
+              <div className="flex-1 space-y-2">
+                <h2 className="text-3xl font-semibold leading-tight text-slate-800">
                   {PACIENTE.nome}
                 </h2>
-                <p className="text-sm text-muted-foreground">
-                  Idade: {PACIENTE.idade}
+                <p className="text-sm leading-relaxed">
+                  <span className="text-slate-500">Idade:</span>{" "}
+                  <span className="font-medium text-slate-800">{PACIENTE.idade}</span>
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Primeira consulta em: {PACIENTE.primeiraConsulta}
+                <p className="text-sm leading-relaxed">
+                  <span className="text-slate-500">Primeira consulta em:</span>{" "}
+                  <span className="font-medium text-slate-800">{PACIENTE.primeiraConsulta}</span>
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Convênio: {PACIENTE.convenio}
+                <p className="text-sm leading-relaxed">
+                  <span className="text-slate-500">Convênio:</span>{" "}
+                  <span className="font-medium text-slate-800">{PACIENTE.convenio}</span>
                 </p>
-                <p className="text-sm text-muted-foreground">
-                  Nascimento: {PACIENTE.nascimento}
+                <p className="text-sm leading-relaxed">
+                  <span className="text-slate-500">Nascimento:</span>{" "}
+                  <span className="font-medium text-slate-800">{PACIENTE.nascimento}</span>
                 </p>
               </div>
 
-              <div className="space-y-1 text-sm text-muted-foreground">
-                <p>Atendimentos: {PACIENTE.atendimentos}</p>
-                <p>Faltas: {PACIENTE.faltas}</p>
+              <div className="space-y-2 text-sm leading-relaxed">
+                <p>
+                  <span className="text-slate-500">Atendimentos:</span>{" "}
+                  <span className="font-medium text-slate-800">{PACIENTE.atendimentos}</span>
+                </p>
+                <p>
+                  <span className="text-slate-500">Faltas:</span>{" "}
+                  <span className="font-medium text-slate-800">{PACIENTE.faltas}</span>
+                </p>
               </div>
 
-              <button className="rounded-md bg-primary px-4 py-2 text-xs font-semibold uppercase tracking-wide text-primary-foreground transition-opacity hover:opacity-90">
+              <button className="rounded-lg border border-border bg-card px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-700 transition-colors hover:bg-slate-100">
                 Visualizar cadastro
               </button>
             </div>
@@ -444,16 +454,16 @@ export function ConsultaPage() {
           {/* Filter bar */}
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Filtrar:</span>
-              <button className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-foreground">
+              <span className="text-slate-500">Filtrar:</span>
+              <button className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-slate-700 transition-colors hover:bg-slate-100">
                 Todos <ChevronDown className="h-3 w-3" />
               </button>
             </div>
             <div className="flex items-center gap-2 text-sm">
-              <button className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-muted-foreground hover:text-foreground">
+              <button className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
                 <Share2 className="h-4 w-4" /> Compartilhar
               </button>
-              <button className="flex items-center gap-2 rounded-md border border-border bg-card px-3 py-1.5 text-muted-foreground hover:text-foreground">
+              <button className="flex items-center gap-2 rounded-lg border border-border bg-card px-3 py-1.5 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900">
                 <Printer className="h-4 w-4" /> Imprimir
               </button>
             </div>
