@@ -9,9 +9,15 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ConsultaDemoRouteImport } from './routes/consulta-demo'
 import { Route as ConsultaRouteImport } from './routes/consulta'
 import { Route as IndexRouteImport } from './routes/index'
 
+const ConsultaDemoRoute = ConsultaDemoRouteImport.update({
+  id: '/consulta-demo',
+  path: '/consulta-demo',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ConsultaRoute = ConsultaRouteImport.update({
   id: '/consulta',
   path: '/consulta',
@@ -26,31 +32,42 @@ const IndexRoute = IndexRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/consulta': typeof ConsultaRoute
+  '/consulta-demo': typeof ConsultaDemoRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/consulta': typeof ConsultaRoute
+  '/consulta-demo': typeof ConsultaDemoRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/consulta': typeof ConsultaRoute
+  '/consulta-demo': typeof ConsultaDemoRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/consulta'
+  fullPaths: '/' | '/consulta' | '/consulta-demo'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/consulta'
-  id: '__root__' | '/' | '/consulta'
+  to: '/' | '/consulta' | '/consulta-demo'
+  id: '__root__' | '/' | '/consulta' | '/consulta-demo'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   ConsultaRoute: typeof ConsultaRoute
+  ConsultaDemoRoute: typeof ConsultaDemoRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/consulta-demo': {
+      id: '/consulta-demo'
+      path: '/consulta-demo'
+      fullPath: '/consulta-demo'
+      preLoaderRoute: typeof ConsultaDemoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/consulta': {
       id: '/consulta'
       path: '/consulta'
@@ -71,7 +88,18 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   ConsultaRoute: ConsultaRoute,
+  ConsultaDemoRoute: ConsultaDemoRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}
