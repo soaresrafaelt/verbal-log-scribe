@@ -1,0 +1,9 @@
+mlx-whisper
+google-generativeai
+openai
+anthropic
+python-dotenv
+fastapi
+uvicorn[standard]
+python-multipart
+spacy>=3.7.0

@@ -1,6 +1,7 @@
 # Nunca versionar o token nem o ambiente
 .env
 .venv/
+.venv312/
 __pycache__/
 *.pyc
 
@@ -20,6 +21,9 @@ prontuario.json
 *.wav
 *.mp3
 *.m4a
+
+# Banco de dados local (dados clinicos sensiveis - LGPD)
+consultas.db
 
 # Configuracoes locais (segredos e paths de maquina)
 settings.local.json
