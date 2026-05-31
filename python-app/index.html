@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gravador de Áudio</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 480px;
+      margin: 40px auto;
+      padding: 0 20px;
+      text-align: center;
+      color: #1a1a1a;
+    }
+    h1 { font-size: 1.4rem; }
+    button {
+      font-size: 1rem;
+      padding: 12px 22px;
+      margin: 6px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+    }
+    button:disabled { background: #9ca3af; cursor: not-allowed; }
+    #stop { background: #dc2626; }
+    #status { margin: 16px 0; font-weight: 600; min-height: 1.4em; }
+    #timer { font-variant-numeric: tabular-nums; color: #555; }
+    audio { width: 100%; margin-top: 16px; }
+    a.download {
+      display: inline-block;
+      margin-top: 16px;
+      color: #2563eb;
+      text-decoration: none;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎙️ Gravador de Áudio</h1>
+  <p>Grave um áudio pelo microfone e baixe em formato <code>.wav</code>.</p>
+
+  <div>
+    <button id="record">● Gravar</button>
+    <button id="stop" disabled>■ Parar</button>
+  </div>
+
+  <p id="status">Pronto.</p>
+  <p id="timer"></p>
+
+  <audio id="player" controls hidden></audio>
+  <div><a id="download" class="download" hidden>⬇️ Baixar .wav</a></div>
+
+  <script>
+    const recordBtn = document.getElementById('record');
+    const stopBtn = document.getElementById('stop');
+    const statusEl = document.getElementById('status');
+    const timerEl = document.getElementById('timer');
+    const player = document.getElementById('player');
+    const downloadLink = document.getElementById('download');
+
+    let audioContext, mediaStream, processor, source;
+    let recordedChunks = [];
+    let sampleRate = 44100;
+    let timerInterval, startTime;
+
+    recordBtn.addEventListener('click', startRecording);
+    stopBtn.addEventListener('click', stopRecording);
+
+    async function startRecording() {
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      } catch (err) {
+        statusEl.textContent = 'Erro ao acessar o microfone: ' + err.message;
+        return;
+      }
+
+      recordedChunks = [];
+      audioContext = new (window.AudioContext || window.webkitAudioContext)();
+      sampleRate = audioContext.sampleRate;
+      source = audioContext.createMediaStreamSource(mediaStream);
+
+      // ScriptProcessor captura amostras PCM cruas para montar o WAV.
+      processor = audioContext.createScriptProcessor(4096, 1, 1);
+      processor.onaudioprocess = (e) => {
+        const channel = e.inputBuffer.getChannelData(0);
+        recordedChunks.push(new Float32Array(channel));
+      };
+      source.connect(processor);
+      processor.connect(audioContext.destination);
+
+      recordBtn.disabled = true;
+      stopBtn.disabled = false;
+      player.hidden = true;
+      downloadLink.hidden = true;
+      statusEl.textContent = '🔴 Gravando...';
+
+      startTime = Date.now();
+      timerInterval = setInterval(updateTimer, 200);
+    }
+
+    function updateTimer() {
+      const s = (Date.now() - startTime) / 1000;
+      timerEl.textContent = s.toFixed(1) + 's';
+    }
+
+    function stopRecording() {
+      clearInterval(timerInterval);
+      processor.disconnect();
+      source.disconnect();
+      mediaStream.getTracks().forEach(t => t.stop());
+      audioContext.close();
+
+      recordBtn.disabled = false;
+      stopBtn.disabled = true;
+      statusEl.textContent = 'Processando...';
+
+      const wavBlob = encodeWAV(mergeChunks(recordedChunks), sampleRate);
+      const url = URL.createObjectURL(wavBlob);
+
+      player.src = url;
+      player.hidden = false;
+
+      const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19);
+      downloadLink.href = url;
+      downloadLink.download = `gravacao-${stamp}.wav`;
+      downloadLink.hidden = false;
+
+      statusEl.textContent = '✅ Pronto! Reproduza ou baixe abaixo.';
+    }
+
+    function mergeChunks(chunks) {
+      const length = chunks.reduce((sum, c) => sum + c.length, 0);
+      const result = new Float32Array(length);
+      let offset = 0;
+      for (const c of chunks) {
+        result.set(c, offset);
+        offset += c.length;
+      }
+      return result;
+    }
+
+    // Converte Float32 PCM para um arquivo WAV (PCM 16-bit mono).
+    function encodeWAV(samples, rate) {
+      const buffer = new ArrayBuffer(44 + samples.length * 2);
+      const view = new DataView(buffer);
+
+      const writeString = (offset, str) => {
+        for (let i = 0; i < str.length; i++) view.setUint8(offset + i, str.charCodeAt(i));
+      };
+
+      writeString(0, 'RIFF');
+      view.setUint32(4, 36 + samples.length * 2, true);
+      writeString(8, 'WAVE');
+      writeString(12, 'fmt ');
+      view.setUint32(16, 16, true);        // tamanho do subchunk fmt
+      view.setUint16(20, 1, true);         // formato PCM
+      view.setUint16(22, 1, true);         // canais (mono)
+      view.setUint32(24, rate, true);      // sample rate
+      view.setUint32(28, rate * 2, true);  // byte rate
+      view.setUint16(32, 2, true);         // block align
+      view.setUint16(34, 16, true);        // bits por amostra
+      writeString(36, 'data');
+      view.setUint32(40, samples.length * 2, true);
+
+      let offset = 44;
+      for (let i = 0; i < samples.length; i++) {
+        const s = Math.max(-1, Math.min(1, samples[i]));
+        view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+        offset += 2;
+      }
+
+      return new Blob([view], { type: 'audio/wav' });
+    }
+  </script>
+</body>
+</html>

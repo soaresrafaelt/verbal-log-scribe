@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel da Consulta — local</title>
+  <style>
+    :root { --azul: #2563eb; --vermelho: #dc2626; --cinza: #9ca3af; --borda: #e5e7eb; }
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 760px; margin: 32px auto; padding: 0 20px; color: #1a1a1a;
+    }
+    h1 { font-size: 1.4rem; margin-bottom: 4px; }
+    .sub { color: #555; margin-top: 0; font-size: .9rem; }
+    /* Abas */
+    .abas { display: flex; gap: 4px; border-bottom: 2px solid var(--borda); margin: 24px 0 0; }
+    .aba {
+      padding: 10px 18px; border: none; background: none; cursor: pointer;
+      font-size: 1rem; color: #555; border-bottom: 2px solid transparent; margin-bottom: -2px;
+    }
+    .aba.ativa { color: var(--azul); border-bottom-color: var(--azul); font-weight: 600; }
+    .painel { display: none; padding: 24px 0; }
+    .painel.ativo { display: block; }
+    /* Botoes */
+    button.acao {
+      font-size: 1rem; padding: 12px 22px; margin: 6px 6px 6px 0; border: none;
+      border-radius: 8px; cursor: pointer; background: var(--azul); color: #fff;
+    }
+    button.acao:disabled { background: var(--cinza); cursor: not-allowed; }
+    #parar { background: var(--vermelho); }
+    .secundario { background: #f3f4f6 !important; color: #1a1a1a !important; border: 1px solid var(--borda) !important; }
+    /* Diversos */
+    .status { margin: 14px 0; font-weight: 600; min-height: 1.4em; }
+    .erro { color: var(--vermelho); }
+    .ok { color: #059669; }
+    .dica { font-size: .85rem; color: #666; background: #f9fafb; border-left: 3px solid var(--azul); padding: 10px 14px; border-radius: 4px; }
+    .aviso { font-size: .85rem; color: #92400e; background: #fffbeb; border-left: 3px solid #f59e0b; padding: 10px 14px; border-radius: 4px; margin-top: 16px; }
+    audio { width: 100%; margin-top: 14px; }
+    textarea {
+      width: 100%; min-height: 280px; font-family: ui-monospace, Menlo, monospace;
+      font-size: .9rem; padding: 12px; border: 1px solid var(--borda); border-radius: 8px; resize: vertical;
+    }
+    .campo { margin-bottom: 16px; }
+    .campo h3 { margin: 0 0 4px; font-size: .95rem; color: var(--azul); }
+    .campo p { margin: 0; white-space: pre-wrap; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid #cbd5e1;
+      border-top-color: var(--azul); border-radius: 50%; animation: girar .8s linear infinite; vertical-align: -2px; margin-right: 6px; }
+    @keyframes girar { to { transform: rotate(360deg); } }
+    label.arquivo { display: inline-block; }
+    /* Barra de historico de consultas */
+    .historico { display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+      margin-top: 16px; padding: 10px 14px; background: #f9fafb; border: 1px solid var(--borda); border-radius: 8px; font-size: .9rem; }
+    .historico select { font-size: .9rem; padding: 6px 8px; border: 1px solid var(--borda); border-radius: 6px; max-width: 100%; }
+    .historico button { font-size: .85rem; padding: 6px 10px; border: 1px solid var(--borda);
+      background: #fff; border-radius: 6px; cursor: pointer; }
+    /* Termos do glossário (categorização) */
+    .termos { margin-top: 20px; padding: 14px 16px; background: #f9fafb; border: 1px solid var(--borda); border-radius: 8px; }
+    .termos h3 { margin: 0 0 4px; font-size: .95rem; color: var(--azul); }
+    .termos .categoria { margin: 10px 0; }
+    .termos .categoria b { display: block; font-size: .8rem; color: #555; text-transform: uppercase; letter-spacing: .03em; margin-bottom: 5px; }
+    .chip { display: inline-block; background: #eef2ff; color: #3730a3; border: 1px solid #c7d2fe;
+      border-radius: 999px; padding: 3px 10px; margin: 0 5px 5px 0; font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <h1>🩺 Painel da Consulta</h1>
+  <p class="sub">Tudo roda nesta máquina, offline. Nenhum áudio ou transcrição sai daqui (LGPD).</p>
+
+  <!-- Histórico: cada consulta tem arquivos próprios (por horário). Reabra uma anterior aqui. -->
+  <div class="historico">
+    <span>🗂️ Consulta:</span>
+    <select id="seletor-consulta" title="Selecione uma consulta do histórico"></select>
+    <button type="button" id="btn-nova" title="Comece uma nova consulta na aba Gravar">+ Nova</button>
+    <span class="sub" id="consulta-etapas"></span>
+  </div>
+
+  <div class="abas">
+    <button class="aba ativa" data-aba="gravar">1 · Gravar áudio</button>
+    <button class="aba" data-aba="transcrever">2 · Transcrever e diarizar</button>
+    <button class="aba" data-aba="prontuario">3 · Prontuário (JSON)</button>
+  </div>
+
+  <!-- ABA 1: GRAVAR -->
+  <section class="painel ativo" id="painel-gravar">
+    <p>Grave a consulta pelo microfone ou selecione um arquivo de áudio já existente.
+       Cada envio inicia uma <b>nova consulta</b>, salva nesta máquina em <code>audios/</code> com o horário no nome.</p>
+    <div>
+      <button class="acao" id="gravar">● Gravar</button>
+      <button class="acao" id="parar" disabled>■ Parar</button>
+      <label class="arquivo">
+        <button class="acao secundario" type="button" onclick="document.getElementById('arquivo').click()">📁 Escolher arquivo</button>
+        <input type="file" id="arquivo" accept="audio/*" hidden>
+      </label>
+    </div>
+    <p class="status" id="status-gravar">Pronto.</p>
+    <p id="timer" style="color:#555;font-variant-numeric:tabular-nums;"></p>
+    <audio id="player" controls hidden></audio>
+    <p class="dica">Após gravar/escolher, o áudio é enviado automaticamente. Vá para a aba <b>2</b> para transcrever.</p>
+  </section>
+
+  <!-- ABA 2: TRANSCREVER -->
+  <section class="painel" id="painel-transcrever">
+    <p>Gera o roteiro com cada fala rotulada por falante e horário
+       (<code>faster-whisper</code> + <code>pyannote</code>, em CPU). Leva alguns minutos.</p>
+    <button class="acao" id="btn-transcrever">▶ Transcrever e diarizar</button>
+    <p class="status" id="status-transcrever"></p>
+    <textarea id="roteiro" placeholder="O roteiro aparecerá aqui após a transcrição. Você pode corrigir os falantes antes de estruturar."></textarea>
+    <div>
+      <button class="acao secundario" id="btn-salvar-roteiro">💾 Salvar correções</button>
+    </div>
+    <p class="dica">Convenção: <b>Falante 1</b> = quem fala primeiro = médico. Corrija o texto se o alinhamento errar, depois salve e vá para a aba <b>3</b>.</p>
+
+    <!-- Termos do glossário médico encontrados no roteiro (classificação por categoria). -->
+    <div id="bloco-termos" class="termos" hidden>
+      <h3>🏷️ Termos identificados (glossário médico)</h3>
+      <p class="sub" style="margin:0 0 10px;">Termos clínicos detectados no roteiro acima, agrupados por categoria. Atualiza ao salvar correções.</p>
+      <div id="termos"></div>
+    </div>
+  </section>
+
+  <!-- ABA 3: PRONTUARIO -->
+  <section class="painel" id="painel-prontuario">
+    <p>Transforma o roteiro em campos de prontuário (LLM local via Ollama). Retorna o JSON tratado.</p>
+    <button class="acao" id="btn-estruturar">▶ Estruturar prontuário</button>
+    <p class="status" id="status-prontuario"></p>
+    <div id="campos"></div>
+    <details id="bloco-json" hidden>
+      <summary style="cursor:pointer;margin:12px 0;font-weight:600;">Ver JSON bruto</summary>
+      <textarea id="json" readonly style="min-height:200px;"></textarea>
+      <div><button class="acao secundario" id="btn-copiar">📋 Copiar JSON</button></div>
+    </details>
+    <p class="aviso">⚠️ Rascunho gerado por IA. O médico deve <b>revisar e validar</b> antes de lançar no prontuário.</p>
+  </section>
+
+<script>
+// ------------------------------------------------------------------ abas
+document.querySelectorAll('.aba').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.aba').forEach(b => b.classList.remove('ativa'));
+    document.querySelectorAll('.painel').forEach(p => p.classList.remove('ativo'));
+    btn.classList.add('ativa');
+    document.getElementById('painel-' + btn.dataset.aba).classList.add('ativo');
+  });
+});
+
+// ----------------------------------------------- histórico de consultas
+// Cada consulta tem arquivos próprios (nomeados por horário). O servidor mantém
+// a "consulta ativa"; aqui listamos o histórico e permitimos reabrir uma anterior.
+const seletor = document.getElementById('seletor-consulta');
+function rotuloEtapas(c) {
+  const e = [];
+  if (c.tem_audio) e.push('áudio');
+  if (c.tem_roteiro) e.push('roteiro');
+  if (c.tem_prontuario) e.push('prontuário');
+  return e.length ? ' — ' + e.join(' · ') : ' — (vazia)';
+}
+function carregarConsultas() {
+  return fetch('/api/consultas').then(r => r.json()).then(d => {
+    seletor.innerHTML = '';
+    if (!d.consultas.length) {
+      const opt = document.createElement('option');
+      opt.textContent = 'Nenhuma consulta ainda — grave na aba 1';
+      opt.disabled = true; opt.selected = true;
+      seletor.append(opt);
+      document.getElementById('consulta-etapas').textContent = '';
+      return;
+    }
+    d.consultas.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.slug;
+      opt.textContent = c.slug + rotuloEtapas(c);
+      if (c.slug === d.atual) opt.selected = true;
+      seletor.append(opt);
+    });
+  });
+}
+seletor.addEventListener('change', () => {
+  const slug = seletor.value;
+  fetch('/api/consulta', { method: 'POST', headers: { 'Content-Type': 'application/json' },
+                           body: JSON.stringify({ consulta: slug }) })
+    .then(r => r.json()).then(() => {
+      // Limpa status das etapas e recarrega os dados da consulta escolhida.
+      ['status-transcrever', 'status-prontuario'].forEach(id => document.getElementById(id).textContent = '');
+      carregarRoteiro();
+      carregarProntuario();
+    });
+});
+document.getElementById('btn-nova').addEventListener('click', () => {
+  document.querySelector('.aba[data-aba="gravar"]').click();
+});
+
+// --------------------------------------------------- polling de status (job)
+// O servidor roda uma tarefa por vez (transcrever OU estruturar) e expoe o
+// progresso em /api/status. Aqui disparamos a tarefa e acompanhamos ate o fim.
+function rodarTarefa(rota, elStatus, aoConcluir) {
+  fetch('/api/' + rota, { method: 'POST' }).then(r => {
+    if (r.status === 409) { elStatus.innerHTML = '<span class="erro">Já há uma tarefa em andamento.</span>'; return; }
+    elStatus.innerHTML = '<span class="spinner"></span> Iniciando...';
+    const timer = setInterval(() => {
+      fetch('/api/status').then(r => r.json()).then(s => {
+        if (s.erro) {
+          clearInterval(timer);
+          elStatus.innerHTML = '<span class="erro">Erro: ' + s.erro + '</span>';
+        } else if (s.rodando) {
+          elStatus.innerHTML = '<span class="spinner"></span> ' + (s.etapa || 'Processando...');
+        } else if (s.concluido) {
+          clearInterval(timer);
+          elStatus.innerHTML = '<span class="ok">✅ Concluído.</span>';
+          aoConcluir && aoConcluir();
+        } else {
+          clearInterval(timer);
+          elStatus.textContent = '';
+        }
+      });
+    }, 1500);
+  }).catch(() => elStatus.innerHTML = '<span class="erro">Servidor indisponível. Rode: python servidor.py</span>');
+}
+
+// ------------------------------------------------------------- ABA 1: gravar
+const statusGravar = document.getElementById('status-gravar');
+const gravarBtn = document.getElementById('gravar');
+const pararBtn = document.getElementById('parar');
+const timerEl = document.getElementById('timer');
+const player = document.getElementById('player');
+let audioContext, mediaStream, processor, source, recordedChunks = [], sampleRate = 44100, timerInterval, startTime;
+
+gravarBtn.addEventListener('click', iniciarGravacao);
+pararBtn.addEventListener('click', pararGravacao);
+document.getElementById('arquivo').addEventListener('change', e => {
+  const f = e.target.files[0];
+  if (f) enviarAudio(f, f.name);
+});
+
+async function iniciarGravacao() {
+  try { mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true }); }
+  catch (err) { statusGravar.innerHTML = '<span class="erro">Erro ao acessar o microfone: ' + err.message + '</span>'; return; }
+  recordedChunks = [];
+  audioContext = new (window.AudioContext || window.webkitAudioContext)();
+  sampleRate = audioContext.sampleRate;
+  source = audioContext.createMediaStreamSource(mediaStream);
+  processor = audioContext.createScriptProcessor(4096, 1, 1);
+  processor.onaudioprocess = e => recordedChunks.push(new Float32Array(e.inputBuffer.getChannelData(0)));
+  source.connect(processor); processor.connect(audioContext.destination);
+  gravarBtn.disabled = true; pararBtn.disabled = false; player.hidden = true;
+  statusGravar.textContent = '🔴 Gravando...';
+  startTime = Date.now();
+  timerInterval = setInterval(() => timerEl.textContent = ((Date.now() - startTime) / 1000).toFixed(1) + 's', 200);
+}
+
+function pararGravacao() {
+  clearInterval(timerInterval);
+  processor.disconnect(); source.disconnect();
+  mediaStream.getTracks().forEach(t => t.stop()); audioContext.close();
+  gravarBtn.disabled = false; pararBtn.disabled = true;
+  const wavBlob = encodeWAV(mergeChunks(recordedChunks), sampleRate);
+  player.src = URL.createObjectURL(wavBlob); player.hidden = false;
+  enviarAudio(wavBlob, 'gravacao.wav');
+}
+
+function enviarAudio(blob, nome) {
+  statusGravar.innerHTML = '<span class="spinner"></span> Enviando "' + nome + '"...';
+  fetch('/api/upload', { method: 'POST', headers: { 'Content-Type': 'application/octet-stream' }, body: blob })
+    .then(r => r.json())
+    .then(d => {
+      const kb = (d.bytes / 1024).toFixed(0);
+      statusGravar.innerHTML = '<span class="ok">✅ Nova consulta ' + d.consulta + ' (' + kb + ' KB). Vá para a aba 2.</span>';
+      // Nova consulta ativa: limpa as etapas anteriores e atualiza o histórico.
+      roteiroEl.value = '';
+      document.getElementById('bloco-termos').hidden = true;
+      document.getElementById('campos').innerHTML = '';
+      document.getElementById('bloco-json').hidden = true;
+      ['status-transcrever', 'status-prontuario'].forEach(id => document.getElementById(id).textContent = '');
+      carregarConsultas();
+    })
+    .catch(() => statusGravar.innerHTML = '<span class="erro">Falha ao enviar. O servidor está rodando?</span>');
+}
+
+function mergeChunks(chunks) {
+  const len = chunks.reduce((s, c) => s + c.length, 0), out = new Float32Array(len);
+  let off = 0; for (const c of chunks) { out.set(c, off); off += c.length; } return out;
+}
+function encodeWAV(samples, rate) {
+  const buffer = new ArrayBuffer(44 + samples.length * 2), view = new DataView(buffer);
+  const ws = (o, s) => { for (let i = 0; i < s.length; i++) view.setUint8(o + i, s.charCodeAt(i)); };
+  ws(0, 'RIFF'); view.setUint32(4, 36 + samples.length * 2, true); ws(8, 'WAVE'); ws(12, 'fmt ');
+  view.setUint32(16, 16, true); view.setUint16(20, 1, true); view.setUint16(22, 1, true);
+  view.setUint32(24, rate, true); view.setUint32(28, rate * 2, true); view.setUint16(32, 2, true);
+  view.setUint16(34, 16, true); ws(36, 'data'); view.setUint32(40, samples.length * 2, true);
+  let off = 44; for (let i = 0; i < samples.length; i++) { const s = Math.max(-1, Math.min(1, samples[i])); view.setInt16(off, s < 0 ? s * 0x8000 : s * 0x7FFF, true); off += 2; }
+  return new Blob([view], { type: 'audio/wav' });
+}
+
+// -------------------------------------------------------- ABA 2: transcrever
+const roteiroEl = document.getElementById('roteiro');
+document.getElementById('btn-transcrever').addEventListener('click', () => {
+  rodarTarefa('transcrever', document.getElementById('status-transcrever'),
+              () => { carregarRoteiro(); carregarConsultas(); });
+});
+document.getElementById('btn-salvar-roteiro').addEventListener('click', () => {
+  fetch('/api/roteiro', { method: 'POST', headers: { 'Content-Type': 'text/plain' }, body: roteiroEl.value })
+    .then(() => {
+      document.getElementById('status-transcrever').innerHTML = '<span class="ok">💾 Roteiro salvo.</span>';
+      carregarTermos();  // re-categoriza após as correções manuais
+    });
+});
+function carregarRoteiro() {
+  fetch('/api/roteiro').then(r => r.text()).then(t => { roteiroEl.value = t; carregarTermos(); });
+}
+// Categorização: lista os termos do glossário médico presentes no roteiro ativo.
+function carregarTermos() {
+  fetch('/api/termos').then(r => r.json()).then(d => {
+    const bloco = document.getElementById('bloco-termos');
+    const cont = document.getElementById('termos');
+    cont.innerHTML = '';
+    const cats = d.categorias || {};
+    if (!Object.keys(cats).length) { bloco.hidden = true; return; }
+    Object.entries(cats).forEach(([cat, termos]) => {
+      const div = document.createElement('div');
+      div.className = 'categoria';
+      const b = document.createElement('b');
+      b.textContent = (d.rotulos && d.rotulos[cat]) || cat;
+      div.append(b);
+      termos.forEach(t => {
+        const span = document.createElement('span');
+        span.className = 'chip'; span.textContent = t;
+        div.append(span);
+      });
+      cont.append(div);
+    });
+    bloco.hidden = false;
+  });
+}
+
+// -------------------------------------------------------- ABA 3: prontuario
+const ROTULOS = {
+  queixa_principal: 'Queixa Principal (QP)',
+  historia_doenca_atual: 'História da Doença Atual (HDA)',
+  antecedentes: 'Antecedentes / Hábitos',
+  hipotese_diagnostica: 'Hipótese Diagnóstica',
+  conduta: 'Conduta / Plano',
+};
+document.getElementById('btn-estruturar').addEventListener('click', () => {
+  rodarTarefa('estruturar', document.getElementById('status-prontuario'),
+              () => { carregarProntuario(); carregarConsultas(); });
+});
+document.getElementById('btn-copiar').addEventListener('click', () => {
+  navigator.clipboard.writeText(document.getElementById('json').value);
+});
+function carregarProntuario() {
+  fetch('/api/prontuario').then(r => r.json()).then(dados => {
+    const campos = document.getElementById('campos');
+    campos.innerHTML = '';
+    // Consulta ainda sem prontuário: nada a exibir.
+    if (!dados || !Object.keys(dados).length) {
+      document.getElementById('bloco-json').hidden = true;
+      return;
+    }
+    Object.entries(ROTULOS).forEach(([chave, rotulo]) => {
+      const div = document.createElement('div');
+      div.className = 'campo';
+      const h = document.createElement('h3'); h.textContent = rotulo;
+      const p = document.createElement('p'); p.textContent = dados[chave] || 'Não relatado';
+      div.append(h, p); campos.append(div);
+    });
+    document.getElementById('json').value = JSON.stringify(dados, null, 2);
+    document.getElementById('bloco-json').hidden = false;
+  });
+}
+
+// Ao abrir o painel, lista o histórico e carrega a consulta ativa (a mais recente).
+window.addEventListener('load', () => {
+  carregarConsultas().then(() => { carregarRoteiro(); carregarProntuario(); });
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,50 @@
+{
+  "_sobre": "Glossario de termos tecnicos medicos (PT-BR) para consulta. Usado para (1) corrigir a grafia de termos na transcricao e (2) categorizar os termos falados. NAO contem dados de paciente: pode ser versionado. Edite a vontade: adicione/remova termos por categoria (sempre em minusculas e com a grafia correta/acentuada).",
+  "sintomas": [
+    "febre", "dor", "cefaleia", "tontura", "nausea", "vomito", "diarreia",
+    "constipacao", "tosse", "dispneia", "falta de ar", "dor toracica",
+    "dor abdominal", "dor lombar", "fadiga", "cansaco", "mal-estar", "calafrio",
+    "sudorese", "palpitacao", "edema", "inchaco", "prurido", "coceira", "azia",
+    "queimacao", "formigamento", "dormencia", "insonia", "perda de apetite",
+    "perda de peso", "visao turva", "zumbido", "rigidez", "caimbra", "tremor"
+  ],
+  "doencas_condicoes": [
+    "hipertensao", "diabetes", "asma", "bronquite", "pneumonia", "gripe",
+    "resfriado", "sinusite", "rinite", "gastrite", "refluxo", "enxaqueca",
+    "depressao", "ansiedade", "anemia", "artrose", "artrite", "infarto", "avc",
+    "dengue", "covid", "hipotireoidismo", "hipertireoidismo", "obesidade",
+    "dislipidemia", "colesterol alto", "insuficiencia cardiaca", "dpoc",
+    "infeccao urinaria", "labirintite", "fibromialgia", "epilepsia"
+  ],
+  "medicamentos": [
+    "dipirona", "paracetamol", "ibuprofeno", "amoxicilina", "azitromicina",
+    "omeprazol", "losartana", "metformina", "insulina", "atenolol", "captopril",
+    "enalapril", "sinvastatina", "atorvastatina", "prednisona", "dexametasona",
+    "salbutamol", "clonazepam", "sertralina", "fluoxetina", "hidroclorotiazida",
+    "acido acetilsalicilico", "aas", "anlodipino", "levotiroxina", "amitriptilina",
+    "diclofenaco", "nimesulida", "loratadina"
+  ],
+  "exames": [
+    "hemograma", "glicemia", "glicose", "colesterol", "triglicerideos",
+    "creatinina", "ureia", "urina", "eletrocardiograma", "ecg", "raio-x",
+    "radiografia", "tomografia", "ressonancia", "ultrassom", "ultrassonografia",
+    "endoscopia", "colonoscopia", "biopsia", "mamografia", "tsh",
+    "hemoglobina glicada", "ecocardiograma", "espirometria", "exame de sangue"
+  ],
+  "procedimentos_condutas": [
+    "encaminhamento", "internacao", "repouso", "hidratacao", "jejum", "curativo",
+    "sutura", "drenagem", "fisioterapia", "dieta", "retorno", "prescricao",
+    "atestado", "imobilizacao", "nebulizacao", "soro", "antibiotico", "analgesia",
+    "cirurgia", "vacinacao", "encaminhar ao especialista"
+  ],
+  "anatomia": [
+    "cabeca", "torax", "abdome", "abdomen", "coracao", "pulmao", "pulmoes",
+    "figado", "rim", "rins", "estomago", "intestino", "garganta", "ouvido",
+    "nariz", "joelho", "tornozelo", "coluna", "articulacao", "musculo", "pele",
+    "bexiga", "pancreas", "esofago", "traqueia"
+  ],
+  "sinais_vitais": [
+    "pressao arterial", "pressao", "frequencia cardiaca", "temperatura",
+    "saturacao", "peso", "altura", "imc", "pulso", "batimentos"
+  ]
+}
